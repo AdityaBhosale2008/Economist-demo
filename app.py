@@ -8,8 +8,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 import shap
-import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
 
 # ========== Data & Model Loaders ==========
 
@@ -25,13 +25,13 @@ def load_xgb_model():
 
 def preprocess(user_input):
     df = pd.DataFrame([user_input])
-    df['subscription_type'] = df['subscription_type'].map({'Espresso':0,'Digital':1,'Digital+Print':2})
-    df['plan_type'] = df['plan_type'].map({'Monthly':0,'Annual':1})
-    df['auto_renew'] = df['auto_renew'].map({'Yes':1,'No':0})
-    df['discount_used_last_renewal'] = df['discount_used_last_renewal'].map({'Yes':1,'No':0})
-    df['downgrade_history'] = df['downgrade_history'].map({'Yes':1,'No':0})
-    df['previous_renewal_status'] = df['previous_renewal_status'].map({'Auto':1,'Manual':0})
-    df['signup_source'] = df['signup_source'].map({'Web':0,'Mobile App':0,'Referral':1})
+    df['subscription_type'] = df['subscription_type'].map({'Espresso': 0, 'Digital': 1, 'Digital+Print': 2})
+    df['plan_type'] = df['plan_type'].map({'Monthly': 0, 'Annual': 1})
+    df['auto_renew'] = df['auto_renew'].map({'Yes': 1, 'No': 0})
+    df['discount_used_last_renewal'] = df['discount_used_last_renewal'].map({'Yes': 1, 'No': 0})
+    df['downgrade_history'] = df['downgrade_history'].map({'Yes': 1, 'No': 0})
+    df['previous_renewal_status'] = df['previous_renewal_status'].map({'Auto': 1, 'Manual': 0})
+    df['signup_source'] = df['signup_source'].map({'Web': 0, 'Mobile App': 0, 'Referral': 1})
 
     df = pd.get_dummies(df, columns=['region', 'most_read_category', 'primary_device', 'payment_method', 'last_campaign_engaged'])
     df = df.fillna(0)
@@ -59,7 +59,6 @@ MODEL_FEATURES = ['subscription_type', 'plan_type', 'auto_renew',
        'last_campaign_engaged_Retention Offer',
        'last_campaign_engaged_Survey']
 
-
 # ========== Streamlit UI ==========
 
 st.set_page_config(page_title="Churn App", layout="wide")
@@ -77,7 +76,7 @@ with tab1:
 
     with st.sidebar.expander("📦 Subscription Details", expanded=True):
         subscription_type = st.selectbox('Subscription Plan Type', ['Espresso', 'Digital', 'Digital+Print'])
-        plan_type = st.selectbox('Plan Type', ['Monthly', 'Yearly'])
+        plan_type = st.selectbox('Plan Type', ['Monthly', 'Annual'])
         signup_source = st.selectbox('Signup Source', ['Web', 'Mobile App', 'Referral'])
         auto_renew = st.checkbox("Auto-renew Enabled?")
         discount_used_last_renewal = st.checkbox("Discount Used at Last Renewal?")
@@ -160,19 +159,38 @@ with tab1:
         st.info(f"🧠 Model Confidence: **{proba * 100:.2f}%** for Churn")
 
         st.subheader("🔎 Feature Importance")
+
         explainer = shap.TreeExplainer(model)
         shap_values = explainer(df)
 
-        # col1, col2 = st.columns(2)
-        # with col1:
-        #     fig, ax = plt.subplots()
-        #     shap.plots.bar(shap_values, max_display=15, ax=ax)
-        #     st.pyplot(fig)
+        # --- Waterfall Plot ---
+        row = shap_values[0]
+        shap_impact = row.values
+        features = row.feature_names
+        base_val = row.base_values
 
-        # with col2:
-        fig, ax = plt.subplots()
-        shap.plots.beeswarm(shap_values, max_display=15, show=True)
-        st.pyplot(fig)
+        top_idx = np.argsort(np.abs(shap_impact))[-15:]
+        top_features = [features[i] for i in top_idx]
+        top_shap = shap_impact[top_idx]
+
+        fig_waterfall = go.Figure(go.Waterfall(
+            orientation="h",
+            measure=["relative"] * len(top_features),
+            x=top_shap,
+            y=top_features,
+            text=[f"{v:.3f}" for v in top_shap],
+            connector={"line": {"color": "rgb(63, 63, 63)"}},
+            decreasing={"marker": {"color": "red"}},
+            increasing={"marker": {"color": "green"}},
+        ))
+
+        fig_waterfall.update_layout(
+            title="SHAP Waterfall for This Prediction",
+            xaxis_title="SHAP Value Impact",
+            yaxis_title="Feature",
+            waterfallgap=0.4
+        )
+        st.plotly_chart(fig_waterfall, use_container_width=True)
 
 
 # ========== Tab 2: Feature Summary Using Plotly ==========
