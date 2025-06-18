@@ -147,7 +147,7 @@ with tab1:
     }
 
     if clear_button:
-        st.experimental_rerun()
+        st.rerun()
 
     if predict_button:
         df = preprocess(user_input)
@@ -163,16 +163,16 @@ with tab1:
         explainer = shap.TreeExplainer(model)
         shap_values = explainer(df)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            fig, ax = plt.subplots()
-            shap.plots.bar(shap_values, max_display=15, ax=ax)
-            st.pyplot(fig)
+        # col1, col2 = st.columns(2)
+        # with col1:
+        #     fig, ax = plt.subplots()
+        #     shap.plots.bar(shap_values, max_display=15, ax=ax)
+        #     st.pyplot(fig)
 
-        with col2:
-            fig, ax = plt.subplots()
-            shap.plots.beeswarm(shap_values, max_display=15, show=True)
-            st.pyplot(fig)
+        # with col2:
+        fig, ax = plt.subplots()
+        shap.plots.beeswarm(shap_values, max_display=15, show=True)
+        st.pyplot(fig)
 
 
 # ========== Tab 2: Feature Summary Using Plotly ==========
