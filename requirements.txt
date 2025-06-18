@@ -6,5 +6,5 @@ streamlit
 matplotlib
 seaborn
 shap 
-
+xgboost
 
