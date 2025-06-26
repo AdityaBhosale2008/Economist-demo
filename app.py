@@ -61,7 +61,7 @@ MODEL_FEATURES = ['subscription_type', 'plan_type', 'auto_renew',
 
 # ========== Streamlit UI ==========
 
-st.set_page_config(page_title="Churn App")
+st.set_page_config(page_title="Churn App", "centered")
 st.title("📕 Economist Churn App")
 st.markdown("This app predicts whether a customer will churn based on their engagement, behavior, and subscription data.")
 
