@@ -156,7 +156,7 @@ with tab1:
 
         result = "Churn" if prediction == 1 else "No Churn"
         st.success(f"📊 **Prediction:** {result}")
-        st.info(f"🧠 Model Confidence: **{proba * 100:.2f}%** for Churn")
+        st.info(f"🧠 Confidence: **{proba * 100:.2f}%** for Churn")
 
         st.subheader("🔎 Feature Importance")
 
