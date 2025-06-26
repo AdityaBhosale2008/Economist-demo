@@ -248,6 +248,6 @@ with tab2:
 
             churn_table = pd.crosstab(data[feature], data['subscription_status'], normalize='index') * 100
             st.markdown("#### 📊 Churn Rate by Category")
-            st.dataframe(churn_table.style.format("{:.1f}%").background_gradient(axis=0, cmap="RdYlGn_r"))
+            st.dataframe(churn_table.style.format("{:.1f}%"))
 
     st.markdown("---")
