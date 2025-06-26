@@ -185,7 +185,7 @@ with tab1:
         ))
 
         fig_waterfall.update_layout(
-            title="🔎 Feature Importance (SHAP Scores)",
+            title="",
             xaxis_title="SHAP Value Impact",
             yaxis_title="Feature",
             waterfallgap=0.4
